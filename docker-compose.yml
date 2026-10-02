@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  web:
+    image: nginx:alpine
+    container_name: compose_web
+    ports:
+      - "8080:80"
+    volumes:
+      - ./html:/usr/share/nginx/html:ro
+    networks:
+      - internal_net
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15-alpine
+    container_name: compose_db
+    # Порт 5432 наружу НЕ пробрасывается — доступен только внутри сети internal_net
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - internal_net
+
+volumes:
+  pgdata:
+
+networks:
+  internal_net:
+    driver: bridge
